@@ -1,0 +1,46 @@
+import javax.annotation.*;
+import org.echocat.redprecursor.annotations.*;
+import java.util.concurrent.*;
+
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
+public class Test {
+
+    private static String juchuu = "abc";
+
+    private String uuu = "def";
+
+    private final String _aString;
+
+    public Test() {
+        _aString = "EMPTY";
+    }
+
+    private Test(@Nonnull String aString) {
+        _aString = aString;
+    }
+
+    @ParametersPassesExpression(value = "aString != null", messageOnViolation = "${this.juchuu}:::${this.uuu}")
+    @GreaterThan(1)
+    public Integer call(@Nonnull @org.echocat.redprecursor.annotations.MatchesPattern("a.*") final String aString, @Nonnegative final Integer anInteger) throws Exception {
+        System.out.println(muff(aString));
+        final Callable<String> callable = new Callable<String>() {
+            @Override
+            @Nonnull
+            public String call() {
+                final String abc = callSome(anInteger);
+                return abc;
+            }
+            private String callSome(@Nonnull Object i) {
+                return aString + ":" + i;
+            }
+        };
+        System.out.println(callable.call());
+        return anInteger;
+    }
+
+    @ParametersPassesExpression(value = "a eq this.juchuu", messageOnViolation = "${this.juchuu}")
+    public static String muff(Object a) {
+        return new Test(a + "")._aString;
+    }
+}

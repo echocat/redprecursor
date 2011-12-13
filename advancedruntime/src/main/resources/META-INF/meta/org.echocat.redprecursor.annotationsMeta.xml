@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotationsMeta xmlns="https://redprecursor.googlecode.com/files/annotationMeta.1.xsd">
+    <annotation type="org.echocat.redprecursor.annotations.ParametersPassesExpression" />
+</annotationsMeta>

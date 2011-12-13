@@ -1,0 +1,4 @@
+org.echocat.redprecursor.handler.NonNullAnnotationBasedHandler
+org.echocat.redprecursor.handler.NumberAnnotationBasedHandler
+org.echocat.redprecursor.handler.RegExAnnotationBasedHandler
+org.echocat.redprecursor.handler.ParametersPassesExpressionAnnotationHandler

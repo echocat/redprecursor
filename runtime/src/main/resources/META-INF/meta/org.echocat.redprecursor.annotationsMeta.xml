@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotationsMeta xmlns="https://redprecursor.googlecode.com/files/annotationMeta.1.xsd">
+    <annotation type="org.echocat.redprecursor.annotations.GreaterThan" />
+    <annotation type="org.echocat.redprecursor.annotations.GreaterThanOrEqualTo" />
+    <annotation type="org.echocat.redprecursor.annotations.GreaterThanOrEqualToZero" />
+    <annotation type="org.echocat.redprecursor.annotations.GreaterThanZero" />
+    <annotation type="org.echocat.redprecursor.annotations.MatchesPattern" />
+    <annotation type="org.echocat.redprecursor.annotations.NonNegative" />
+    <annotation type="org.echocat.redprecursor.annotations.NonNull" />
+    <annotation type="org.echocat.redprecursor.annotations.RegEx" />
+
+    <annotation type="javax.annotation.MatchesPattern">
+        <evaluator type="org.echocat.redprecursor.annotations.javaxextensions.MatchesPatternAnnotationEvaluator" />
+    </annotation>
+    <annotation type="javax.annotation.Nonnegative">
+        <evaluator type="org.echocat.redprecursor.annotations.javaxextensions.NonnegativeAnnotationEvaluator" />
+    </annotation>
+    <annotation type="javax.annotation.Nonnull">
+        <evaluator type="org.echocat.redprecursor.annotations.javaxextensions.NonnullAnnotationEvaluator" />
+    </annotation>
+    <annotation type="javax.annotation.RegEx">
+        <evaluator type="org.echocat.redprecursor.annotations.javaxextensions.RegExAnnotationEvaluator" />
+    </annotation>
+</annotationsMeta>

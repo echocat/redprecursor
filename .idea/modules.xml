@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.iml" filepath="$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.advancedruntime.iml" filepath="$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.advancedruntime.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.common.iml" filepath="$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.compilerplugin.iml" filepath="$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.compilerplugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.runtime.iml" filepath="$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.runtime.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.sun.iml" filepath="$PROJECT_DIR$/.idea/modules/org.echocat.redprecursor.sun.iml" />
+    </modules>
+  </component>
+</project>
+
