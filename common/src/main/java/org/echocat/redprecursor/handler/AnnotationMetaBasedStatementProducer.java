@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -29,12 +29,13 @@ import org.echocat.redprecursor.annotations.AnnotationProxier;
 import org.echocat.redprecursor.compilertree.*;
 import org.echocat.redprecursor.compilertree.base.Declaration;
 import org.echocat.redprecursor.compilertree.base.Expression;
-import org.echocat.redprecursor.compilertree.base.Statement;
 import org.echocat.redprecursor.handler.AnnotationMetaBasedStatementProducer.Request;
 import org.echocat.redprecursor.meta.AnnotationAndMeta;
 
 import javax.annotation.Generated;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.Map.Entry;
@@ -43,6 +44,8 @@ import static java.text.DateFormat.MEDIUM;
 import static java.util.Arrays.asList;
 import static java.util.Locale.US;
 import static org.echocat.redprecursor.compilertree.Modifier.*;
+import static org.echocat.redprecursor.handler.TypeResolver.resolveRawIdentifier;
+import static org.echocat.redprecursor.util.ModifiersUtil.hasModifier;
 import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
 
 /**
@@ -54,7 +57,11 @@ import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
  */
 public abstract class AnnotationMetaBasedStatementProducer<T extends Request> {
 
-    public static final String ANNOTATION_METAS_FIELD_NAME = "generated$redprecursor$annotationMetas";
+    private static volatile long c_currentFieldNumber = 1;
+    private static final Map<String, Long> CLASS_NAME_TO_FIELD_NUMBER = new HashMap<String, Long>();
+
+    public static final String ANNOTATION_METAS_FIELD_NAME_PREFIX = "generated$redprecursor$annotationMetas";
+    public static final String ANNOTATION_METAS_CLASS_NAME_SUFFIX = "$Generated$Redprecursor";
 
     public interface Request {
         @Nonnull public Annotation getAnnotation();
@@ -72,43 +79,87 @@ public abstract class AnnotationMetaBasedStatementProducer<T extends Request> {
     }
 
     @Nonnull
-    public abstract Statement produce(@Nonnull T request);
+    public abstract Expression produce(@Nonnull T request);
 
     @Nonnull
     protected Identifier getIdentifierOfAnnotationAndMetaInstance(@Nonnull T request) {
         final MethodStatement methodStatement = request.getMethodStatement();
-        final ClassDeclaration topClass = methodStatement.getTopClass();
-        final List<Declaration> declarations = new ArrayList<Declaration>(topClass.getDeclarations());
+        final ClassDeclaration targetClass = selectTargetClassFor(methodStatement);
+        final List<Declaration> declarations = new ArrayList<Declaration>(targetClass.getDeclarations());
         VariableDeclaration fieldDeclaration = null;
         for (Declaration declaration : declarations) {
             if (declaration instanceof VariableDeclaration) {
                 final VariableDeclaration existingFieldDeclaration = (VariableDeclaration) declaration;
-                if (ANNOTATION_METAS_FIELD_NAME.equals(existingFieldDeclaration.getName())) {
+                if (existingFieldDeclaration.getName().startsWith(ANNOTATION_METAS_FIELD_NAME_PREFIX)) {
                     fieldDeclaration = existingFieldDeclaration;
                 }
             }
         }
         if (fieldDeclaration == null) {
-            fieldDeclaration = createFieldDeclaration();
+            fieldDeclaration = createFieldDeclaration(targetClass, null);
             declarations.add(0, fieldDeclaration);
-            topClass.setDeclarations(declarations);
+            targetClass.setDeclarations(declarations);
         }
         final int index = setInitialValueOfFieldDeclarationAndReturnCurrentIndex(request, fieldDeclaration);
-        final FieldAccess arrayFieldAccess = _nodeFactory.createFieldAccess(_nodeFactory.createIdentifier(methodStatement.getTopClass().getFullName()), fieldDeclaration.getName());
+        final FieldAccess arrayFieldAccess = _nodeFactory.createFieldAccess(_nodeFactory.createIdentifier(targetClass.getFullName()), fieldDeclaration.getName());
         return _nodeFactory.createArrayAccess(arrayFieldAccess, _nodeFactory.createLiteral(index));
     }
 
     @Nonnull
-    protected VariableDeclaration createFieldDeclaration() {
+    protected ClassDeclaration selectTargetClassFor(@Nonnull MethodStatement methodStatement) {
+        final ClassDeclaration topClass = methodStatement.getTopClass();
+
+        final ClassDeclaration result;
+        if (hasModifier(topClass, ENUM) || hasModifier(topClass, INTERFACE)) {
+            final CompilationUnit compilationUnit = methodStatement.getCompilationUnit();
+            final List<Declaration> declarations = new ArrayList<Declaration>(compilationUnit.getDeclarations());
+            final String targetClassName = topClass.getFullName() + ANNOTATION_METAS_CLASS_NAME_SUFFIX;
+            ClassDeclaration extraClass = null;
+            for (Declaration declaration : declarations) {
+                if (declaration instanceof ClassDeclaration) {
+                    if (targetClassName.equals(((ClassDeclaration) declaration).getFullName())) {
+                        extraClass = (ClassDeclaration) declaration;
+                    }
+                }
+            }
+            if (extraClass == null) {
+                final Modifiers modifier = _nodeFactory.createModifier(asList(FINAL));
+                modifier.setAnnotations(asList(createGeneratedAnnotation()));
+                extraClass = _nodeFactory.createClassDeclaration(targetClassName, modifier);
+                declarations.add(extraClass);
+                compilationUnit.setDeclarations(declarations);
+            }
+            result = extraClass;
+        } else {
+            result = topClass;
+        }
+        return result;
+    }
+
+    @Nonnull
+    protected VariableDeclaration createFieldDeclaration(@Nonnull ClassDeclaration forClass, @Nullable Modifier access) {
         final Identifier identifier = _nodeFactory.createIdentifier(AnnotationAndMeta.class.getName());
         final Wildcard wildcard1 = _nodeFactory.createWildcard(WildcardKind.UNBOUND, null);
         final Wildcard wildcard2 = _nodeFactory.createWildcard(WildcardKind.UNBOUND, null);
         final TypeApply typeApply = _nodeFactory.createTypeApply(identifier, Arrays.<Identifier>asList(wildcard1, wildcard2));
         final ArrayType arrayType = _nodeFactory.createArrayType(typeApply);
-        final VariableDeclaration fieldDeclaration = _nodeFactory.createVariableDeclaration(ANNOTATION_METAS_FIELD_NAME, arrayType);
+        final VariableDeclaration fieldDeclaration = _nodeFactory.createVariableDeclaration(ANNOTATION_METAS_FIELD_NAME_PREFIX + getFieldNumberFor(forClass), arrayType);
 
-        fieldDeclaration.setModifiers(createModifiers());
+        fieldDeclaration.setModifiers(createModifiers(access));
         return fieldDeclaration;
+    }
+
+    @Nonnegative
+    protected long getFieldNumberFor(@Nonnull ClassDeclaration classDeclaration) {
+        synchronized (CLASS_NAME_TO_FIELD_NUMBER) {
+            final String fullName = classDeclaration.getFullName();
+            Long fieldNumber = CLASS_NAME_TO_FIELD_NUMBER.get(fullName);
+            if (fieldNumber == null) {
+                fieldNumber = c_currentFieldNumber++;
+                CLASS_NAME_TO_FIELD_NUMBER.put(fullName, fieldNumber);
+            }
+            return fieldNumber;
+        }
     }
 
     protected int setInitialValueOfFieldDeclarationAndReturnCurrentIndex(@Nonnull Request request, @Nonnull VariableDeclaration fieldDeclaration) {
@@ -191,14 +242,16 @@ public abstract class AnnotationMetaBasedStatementProducer<T extends Request> {
             methodParameters.add(_nodeFactory.createLiteral(((MethodParameterStatement) methodStatement).getParameterIndex()));
         }
         for (VariableDeclaration parameterDeclaration : methodStatement.getMethod().getParameterDeclarations()) {
-            methodParameters.add(_nodeFactory.createFieldAccess(parameterDeclaration.getType(), "class"));
+            final Identifier identifier = resolveRawIdentifier(methodStatement, _nodeFactory, parameterDeclaration.getType());
+            methodParameters.add(_nodeFactory.createFieldAccess(identifier, "class"));
         }
         return methodParameters;
     }
 
     @Nonnull
-    protected Modifiers createModifiers() {
-        final Modifiers modifiers = _nodeFactory.createModifier(asList(PRIVATE, FINAL, STATIC));
+    protected Modifiers createModifiers(@Nullable Modifier access) {
+        final List<Modifier> effective = access != null ? asList(access, FINAL, STATIC) : asList(FINAL, STATIC);
+        final Modifiers modifiers = _nodeFactory.createModifier(effective);
         modifiers.setAnnotations(asList(createGeneratedAnnotation()));
         return modifiers;
     }

@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -39,14 +39,14 @@ public class MethodParameterStatement extends MethodStatement {
     private final VariableDeclaration _parameter;
     private final int _parameterIndex;
 
-    public MethodParameterStatement(@Nonnull CompilationUnit compilationUnit, @Nonnull ClassDeclaration topClass, @Nonnull ClassDeclaration currentClass, @Nonnull MethodDeclaration method, @Nonnull VariableDeclaration parameter, @Nonnegative int parameterIndex) {
-        super(compilationUnit, topClass, currentClass, method);
+    public MethodParameterStatement(@Nonnull CompilationUnit compilationUnit, @Nonnull ClassDeclaration[] classDeclarations, @Nonnull MethodDeclaration method, @Nonnull VariableDeclaration parameter, @Nonnegative int parameterIndex) {
+        super(compilationUnit, method, classDeclarations);
         _parameter = requireNonNull("variableDeclaration", parameter);
         _parameterIndex = parameterIndex;
     }
 
     public MethodParameterStatement(@Nonnull MethodStatement methodStatement, @Nonnull VariableDeclaration parameter, @Nonnegative int parameterIndex) {
-        this(methodStatement.getCompilationUnit(), methodStatement.getTopClass(), methodStatement.getCurrentClass(), methodStatement.getMethod(), parameter, parameterIndex);
+        this(methodStatement.getCompilationUnit(), methodStatement.getDeclarations(), methodStatement.getMethod(), parameter, parameterIndex);
     }
 
     @Nonnull

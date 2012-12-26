@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -28,19 +28,20 @@ import org.echocat.redprecursor.compilertree.ClassDeclaration;
 import org.echocat.redprecursor.compilertree.CompilationUnit;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import static java.lang.System.arraycopy;
+import static org.echocat.redprecursor.utils.ContractUtil.requireNonEmpty;
 import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
 
 public class InClassStatement {
 
     private final CompilationUnit _compilationUnit;
-    private final ClassDeclaration _topClass;
-    private final ClassDeclaration _currentClass;
+    private final ClassDeclaration[] _declarations;
 
-    public InClassStatement(@Nonnull CompilationUnit compilationUnit, @Nonnull ClassDeclaration topClass, @Nonnull ClassDeclaration currentClass) {
+    public InClassStatement(@Nonnull CompilationUnit compilationUnit, @Nonnull ClassDeclaration... declarations) {
         _compilationUnit = requireNonNull("compilationUnit", compilationUnit);
-        _topClass = requireNonNull("topClass", topClass);
-        _currentClass = requireNonNull("currentClass", currentClass);
+        _declarations = requireNonEmpty("declarations", declarations);
     }
 
     @Nonnull
@@ -49,12 +50,32 @@ public class InClassStatement {
     }
 
     @Nonnull
+    public ClassDeclaration[] getDeclarations() {
+        return _declarations;
+    }
+
+    @Nonnull
     public ClassDeclaration getTopClass() {
-        return _topClass;
+        return _declarations[0];
     }
 
     @Nonnull
     public ClassDeclaration getCurrentClass() {
-        return _currentClass;
+        return _declarations[_declarations.length - 1];
+    }
+
+    @Nonnull
+    public ClassDeclaration[] getDeclarationsWith(@Nonnull ClassDeclaration next) {
+        return getDeclarationsWith(_declarations, next);
+    }
+
+    @Nonnull
+    public static ClassDeclaration[] getDeclarationsWith(@Nullable ClassDeclaration[] base, @Nonnull ClassDeclaration next) {
+        final ClassDeclaration[] declarations = new ClassDeclaration[base != null ? base.length + 1 : 1];
+        if (base != null) {
+            arraycopy(base, 0, declarations, 0, base.length);
+        }
+        declarations[declarations.length - 1] = next;
+        return declarations;
     }
 }

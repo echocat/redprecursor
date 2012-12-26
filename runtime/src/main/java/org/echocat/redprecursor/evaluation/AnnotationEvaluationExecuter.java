@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -29,6 +29,7 @@ import org.echocat.redprecursor.meta.AnnotationAndMeta;
 import org.echocat.redprecursor.meta.AnnotationMeta;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 
@@ -37,13 +38,13 @@ import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
 @VisibleInStackTraces(false)
 public class AnnotationEvaluationExecuter {
 
-    public static <T extends Annotation> void execute(@Nonnull AnnotationAndMeta<T, ?> annotationAndMeta, @Nonnull ElementType elementType, @Nonnull String elementName, @Nonnull Object value) {
+    public static <A extends Annotation> void execute(@Nonnull AnnotationAndMeta<A, ?> annotationAndMeta, @Nonnull ElementType elementType, @Nonnull String elementName, @Nullable Object value) {
         requireNonNull("annotationAndMeta", annotationAndMeta);
         requireNonNull("elementType", elementType);
         requireNonNull("elementName", elementName);
         // noinspection unchecked
-        final AnnotationMeta<T, Object> meta = (AnnotationMeta<T, Object>) annotationAndMeta.getMeta();
-        final T annotation = annotationAndMeta.getAnnotation();
+        final AnnotationMeta<A, Object> meta = (AnnotationMeta<A, Object>) annotationAndMeta.getMeta();
+        final A annotation = annotationAndMeta.getAnnotation();
         meta.getAnnotationEvaluator().evaluate(annotation, elementType, elementName, value);
     }
 

@@ -96,6 +96,7 @@
     </inspection_tool>
     <inspection_tool class="ExceptionFromCatchWhichDoesntWrap" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreGetMessage" value="false" />
+      <option name="ignoreCantWrap" value="false" />
     </inspection_tool>
     <inspection_tool class="ExceptionNameDoesntEndWithException" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ExtendsAnnotation" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
@@ -301,11 +302,12 @@
     <inspection_tool class="PublicField" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreEnums" value="false" />
       <option name="ignorableAnnotations">
-        <value />
+        <value>
+          <item value="org.junit.Rule" />
+        </value>
       </option>
     </inspection_tool>
     <inspection_tool class="RawUseOfParameterizedType" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="ignoreObjectConstruction" value="true" />
       <option name="ignoreTypeCasts" value="true" />
     </inspection_tool>
     <inspection_tool class="RedundantFieldInitialization" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -357,6 +359,14 @@
     <inspection_tool class="ThrownExceptionsPerMethod" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_limit" value="5" />
     </inspection_tool>
+    <inspection_tool class="UNUSED_SYMBOL" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="LOCAL_VARIABLE" value="true" />
+      <option name="FIELD" value="true" />
+      <option name="METHOD" value="true" />
+      <option name="CLASS" value="true" />
+      <option name="PARAMETER" value="true" />
+      <option name="REPORT_PARAMETER_FOR_PUBLIC_METHODS" value="false" />
+    </inspection_tool>
     <inspection_tool class="UnnecessaryConstructor" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UnnecessaryContinue" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="UnnecessaryFullyQualifiedName" enabled="true" level="WARNING" enabled_by_default="true">
@@ -395,6 +405,9 @@
     <inspection_tool class="UtilityClassWithPublicConstructor" enabled="true" level="ERROR" enabled_by_default="true" />
     <inspection_tool class="UtilityClassWithoutPrivateConstructor" enabled="true" level="ERROR" enabled_by_default="true">
       <option name="ignoreClassesWithOnlyMain" value="false" />
+      <option name="ignorableAnnotations">
+        <value />
+      </option>
     </inspection_tool>
     <inspection_tool class="VtlFileReferencesInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="VtlInterpolationsInspection" enabled="false" level="ERROR" enabled_by_default="false" />

@@ -22,10 +22,33 @@
  * *** END LICENSE BLOCK *****
  ****************************************************************************************/
 
-package org.echocat.redprecursor.compilertree;
+package org.echocat.redprecursor.util;
 
-import org.echocat.redprecursor.compilertree.base.BodyStatement;
-import org.echocat.redprecursor.compilertree.base.Declaration;
-import org.echocat.redprecursor.compilertree.base.Statement;
+import org.echocat.redprecursor.compilertree.Modifier;
+import org.echocat.redprecursor.compilertree.Modifiers;
+import org.echocat.redprecursor.compilertree.base.ModifiersEnabledNode;
 
-public interface Block extends BodyStatement<Statement>, Declaration {}
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
+
+import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
+
+public class ModifiersUtil {
+
+    public static boolean hasModifier(@Nullable ModifiersEnabledNode node, @Nonnull Modifier modifier) {
+        requireNonNull("modifier", modifier);
+        final boolean result;
+        final Modifiers modifiers = node != null ? node.getModifiers() : null;
+        if (modifiers != null) {
+            final List<Modifier> allModifier = modifiers.getModifier();
+            result = allModifier != null && allModifier.contains(modifier);
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    private ModifiersUtil() {}
+
+}

@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ * *** BEGIN LICENSE BLOCK *****
+ *
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is echocat redprecursor.
+ *
+ * The Initial Developer of the Original Code is Gregor Noczinski.
+ * Portions created by the Initial Developer are Copyright (C) 2012
+ * the Initial Developer. All Rights Reserved.
+ *
+ * *** END LICENSE BLOCK *****
+ ****************************************************************************************/
+
 package org.echocat.redprecursor.impl.sun.compilertree;
 
 import com.sun.tools.javac.tree.JCTree.JCAnnotation;
@@ -10,7 +34,7 @@ import java.util.Map;
 
 import static org.echocat.redprecursor.utils.ContractUtil.*;
 
-public class SunAnnotation implements Annotation, SunNode {
+public class SunAnnotation implements Annotation, SunExpression {
 
     private final JCAnnotation _jc;
     private final SunNodeConverter _converter;
@@ -41,6 +65,7 @@ public class SunAnnotation implements Annotation, SunNode {
         _jc.annotationType = sunType.getJc();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Iterable<? extends SunNode> getAllEnclosedNodes() {
         return IterableBuilder.<SunNode>toIterable(getType()).append(getArguments().values());

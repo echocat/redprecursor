@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -36,8 +36,8 @@ public class MethodStatement extends InClassStatement {
 
     private final MethodDeclaration _method;
 
-    public MethodStatement(@Nonnull CompilationUnit compilationUnit, @Nonnull ClassDeclaration topClass, @Nonnull ClassDeclaration currentClass, @Nonnull MethodDeclaration method) {
-        super(compilationUnit, topClass, currentClass);
+    public MethodStatement(@Nonnull CompilationUnit compilationUnit, @Nonnull MethodDeclaration method, @Nonnull ClassDeclaration... declarations) {
+        super(compilationUnit, declarations);
         _method = requireNonNull("method", method);
     }
 

@@ -16,7 +16,7 @@
   ~ The Original Code is echocat redprecursor.
   ~
   ~ The Initial Developer of the Original Code is Gregor Noczinski.
-  ~ Portions created by the Initial Developer are Copyright (C) 2011
+  ~ Portions created by the Initial Developer are Copyright (C) 2012
   ~ the Initial Developer. All Rights Reserved.
   ~
   ~ **** END LICENSE BLOCK *****
@@ -32,7 +32,7 @@
     <groupId>org.echocat</groupId>
     <artifactId>redprecursor</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <url>http://redprecursor.echocat.org/</url>
 
     <licenses>
@@ -56,7 +56,6 @@
     </modules>
 
     <properties>
-        <organization.logo>http://www.echocat.org/logo.png</organization.logo>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

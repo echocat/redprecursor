@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ * *** BEGIN LICENSE BLOCK *****
+ *
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is echocat redprecursor.
+ *
+ * The Initial Developer of the Original Code is Gregor Noczinski.
+ * Portions created by the Initial Developer are Copyright (C) 2012
+ * the Initial Developer. All Rights Reserved.
+ *
+ * *** END LICENSE BLOCK *****
+ ****************************************************************************************/
+
 package org.echocat.redprecursor.handler;
 
 import org.echocat.redprecursor.compilertree.*;
@@ -16,6 +40,8 @@ import java.util.*;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Collections.singletonList;
+import static org.echocat.redprecursor.compilertree.Modifier.ABSTRACT;
+import static org.echocat.redprecursor.compilertree.Modifier.INTERFACE;
 import static org.echocat.redprecursor.handler.Principal.RETURN;
 import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
 
@@ -67,40 +93,61 @@ public abstract class AnnotationBasedHandler extends MethodBasedHandler {
     protected void assertThatTypeCouldHandled(@Nonnull Identifier typeToCheck, @Nonnull Annotation forAnnotation) {}
 
     @Nullable
-    protected Statement generateStatementFor(@Nonnull StatementCreationRequest statementCreationRequest) {
+    protected Expression generateExpressionFor(@Nonnull StatementCreationRequest statementCreationRequest) {
         final AnnotationBasedEvaluationExecuterStatementProducer statementProducer = new AnnotationBasedEvaluationExecuterStatementProducer(getNodeFactory());
         return statementProducer.produce(statementCreationRequest);
     }
 
-    @Override
-    protected void handleMethod(@Nonnull Request request, @Nonnull MethodStatement methodStatement, @Nonnull Node parent) {
-        final CompilationUnit compilationUnit = methodStatement.getCompilationUnit();
-        final MethodDeclaration method = methodStatement.getMethod();
-        final ClassDeclaration topClassDeclaration = methodStatement.getTopClass();
-        final ClassDeclaration lastClassDeclaration = methodStatement.getCurrentClass();
-        final Modifiers modifiers = method.getModifiers();
-        final Collection<Annotation> handlableAnnotations = new ArrayList<Annotation>();
-        for (Annotation annotation : modifiers.getAnnotations()) {
-            if (canHandle(annotation)) {
-                handlableAnnotations.add(annotation);
+    protected boolean handleAbstractMethods(@Nonnull Request request, @Nonnull MethodStatement methodStatement, @Nonnull Node parent) {
+        return false;
+    }
+
+    protected boolean isAbstractMethod(@Nonnull Request request, @Nonnull MethodStatement methodStatement, @Nonnull Node parent) {
+        boolean isAbstract = false;
+        final Modifiers methodModifiers = methodStatement.getMethod().getModifiers();
+        if (methodModifiers != null) {
+            final List<Modifier> allModifiers = methodModifiers.getModifier();
+            isAbstract = allModifiers != null && allModifiers.contains(ABSTRACT);
+        }
+        if (!isAbstract) {
+            final Modifiers classModifiers = methodStatement.getCurrentClass().getModifiers();
+            if (classModifiers != null) {
+                final List<Modifier> allModifiers = classModifiers.getModifier();
+                isAbstract = allModifiers != null && allModifiers.contains(INTERFACE);
             }
         }
-        if (handlableAnnotations.isEmpty()) {
-            for (Node subNode : method.getAllEnclosedNodes()) {
-                handle(request, subNode, method, null, compilationUnit, topClassDeclaration, lastClassDeclaration);
-            }
-        } else {
-            for (Node subNode : method.getAllEnclosedNodes()) {
-                handle(request, subNode, method, new ParentMethodWithHandleableAnnotations(method, handlableAnnotations), compilationUnit, topClassDeclaration, lastClassDeclaration);
-            }
-        }
-        handleMethodParameters(request, new MethodStatement(compilationUnit, topClassDeclaration, lastClassDeclaration, method));
+        return isAbstract;
     }
 
     @Override
-    protected void handleOther(@Nonnull Request request, @Nonnull Node node, @Nonnull Node parent, @Nonnull ParentMethod parentMethod, @Nonnull CompilationUnit compilationUnit, @Nullable ClassDeclaration topClassDeclaration, @Nullable ClassDeclaration lastClassDeclaration) {
+    protected void handleMethod(@Nonnull Request request, @Nonnull MethodStatement methodStatement, @Nonnull Node parent) {
+        if (!isAbstractMethod(request, methodStatement, parent) || handleAbstractMethods(request, methodStatement, parent)) {
+            final CompilationUnit compilationUnit = methodStatement.getCompilationUnit();
+            final MethodDeclaration method = methodStatement.getMethod();
+            final Modifiers modifiers = method.getModifiers();
+            final Collection<Annotation> handlableAnnotations = new ArrayList<Annotation>();
+            for (Annotation annotation : modifiers.getAnnotations()) {
+                if (canHandle(annotation)) {
+                    handlableAnnotations.add(annotation);
+                }
+            }
+            if (handlableAnnotations.isEmpty()) {
+                for (Node subNode : method.getAllEnclosedNodes()) {
+                    handle(request, subNode, method, null, compilationUnit, methodStatement.getDeclarations());
+                }
+            } else {
+                for (Node subNode : method.getAllEnclosedNodes()) {
+                    handle(request, subNode, method, new ParentMethodWithHandleableAnnotations(method, handlableAnnotations), compilationUnit, methodStatement.getDeclarations());
+                }
+            }
+            handleMethodParameters(request, new MethodStatement(compilationUnit, method, methodStatement.getDeclarations()));
+        }
+    }
+
+    @Override
+    protected void handleOther(@Nonnull Request request, @Nonnull Node node, @Nonnull Node parent, @Nonnull ParentMethod parentMethod, @Nonnull CompilationUnit compilationUnit, @Nullable ClassDeclaration[] classDeclarations) {
         if (node instanceof Return && parentMethod != null) {
-            final MethodStatement methodStatement = new MethodStatement(compilationUnit, topClassDeclaration, lastClassDeclaration, parentMethod.getMethod());
+            final MethodStatement methodStatement = new MethodStatement(compilationUnit, parentMethod.getMethod(), classDeclarations);
             handleReturn(request, methodStatement, (Return) node, parent, ((ParentMethodWithHandleableAnnotations) parentMethod).getHandlableAnnotations());
         }
     }
@@ -119,9 +166,9 @@ public abstract class AnnotationBasedHandler extends MethodBasedHandler {
             final MethodDeclaration method = methodStatement.getMethod();
             assertThatTypeCouldHandled(method.getResultType(), annotation);
             final StatementCreationRequest statementCreationRequest = new StatementCreationRequest(request, RETURN, annotation, identifierToCheck, methodStatement.getMethod().getResultType(), methodStatement);
-            final Statement statement = generateStatementFor(statementCreationRequest);
+            final Expression statement = generateExpressionFor(statementCreationRequest);
             if (statement != null) {
-                statementsToPrependToReturn.add(statement);
+                statementsToPrependToReturn.add(getNodeFactory().createExpressionStatement(statement));
             }
         }
         prependStatementsToReturn(ret, parent, statementsToPrependToReturn);
@@ -182,35 +229,35 @@ public abstract class AnnotationBasedHandler extends MethodBasedHandler {
         requireNonNull("request", request);
         requireNonNull("methodStatement", methodStatement);
         final List<Statement> statementsToPrepend = new ArrayList<Statement>();
-        final ListIterator<? extends VariableDeclaration> i = methodStatement.getMethod().getParameterDeclarations().listIterator();
+        final MethodDeclaration method = methodStatement.getMethod();
+        final ListIterator<? extends VariableDeclaration> i = method.getParameterDeclarations().listIterator();
         while (i.hasNext()) {
             final int parameterIndex = i.nextIndex();
             final VariableDeclaration parameter = i.next();
             for (Annotation annotation : parameter.getModifiers().getAnnotations()) {
                 if (canHandle(annotation)) {
-                    final Statement statement = checkParameterAndCreateStatement(request, new MethodParameterStatement(methodStatement, parameter, parameterIndex), annotation);
-                    if (statement != null) {
-                        statementsToPrepend.add(statement);
+                    final Expression expression = checkParameterAndCreateExpression(request, new MethodParameterStatement(methodStatement, parameter, parameterIndex), annotation);
+                    if (expression != null) {
+                        statementsToPrepend.add(getNodeFactory().createExpressionStatement(expression));
                     }
                 }
             }
         }
-        prependStatementsToBody(methodStatement.getMethod(), statementsToPrepend);
+        prependStatementsToBody(method, statementsToPrepend);
     }
 
     @Nullable
-    protected Statement checkParameterAndCreateStatement(@Nonnull Request request, @Nonnull MethodParameterStatement methodParameterStatement, @Nonnull Annotation annotation) {
+    protected Expression checkParameterAndCreateExpression(@Nonnull Request request, @Nonnull MethodParameterStatement methodParameterStatement, @Nonnull Annotation annotation) {
         requireNonNull("request", request);
         requireNonNull("methodParameterStatement", methodParameterStatement);
         requireNonNull("annotation", annotation);
         final NodeFactory nodeFactory = requireNonNull("Property nodeFactory", getNodeFactory());
-        final String parameterName = methodParameterStatement.getParameter().getName();
+        final VariableDeclaration parameter = methodParameterStatement.getParameter();
+        final String parameterName = parameter.getName();
         final Key variableNameId = nodeFactory.createKey(parameterName);
 
-        final VariableDeclaration parameter = methodParameterStatement.getParameter();
         assertThatTypeCouldHandled(parameter.getType(), annotation);
-        final StatementCreationRequest statementCreationRequest = new StatementCreationRequest(request, Principal.PARAMETER, annotation, variableNameId, methodParameterStatement.getParameter().getType(), methodParameterStatement);
-        final Statement statement = generateStatementFor(statementCreationRequest);
-        return statement;
+        final StatementCreationRequest statementCreationRequest = new StatementCreationRequest(request, Principal.PARAMETER, annotation, variableNameId, parameter.getType(), methodParameterStatement);
+        return generateExpressionFor(statementCreationRequest);
     }
 }

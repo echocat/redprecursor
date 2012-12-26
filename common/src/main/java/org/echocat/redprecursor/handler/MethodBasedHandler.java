@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -25,8 +25,7 @@
 package org.echocat.redprecursor.handler;
 
 import org.echocat.redprecursor.compilertree.*;
-import org.echocat.redprecursor.compilertree.base.Node;
-import org.echocat.redprecursor.compilertree.base.Statement;
+import org.echocat.redprecursor.compilertree.base.*;
 import org.echocat.redprecursor.compilertree.util.PositionUtils;
 import org.echocat.redprecursor.meta.AnnotationMetaFactory;
 import org.echocat.redprecursor.meta.AnnotationMetaFactoryAware;
@@ -90,24 +89,25 @@ public abstract class MethodBasedHandler implements Handler, NodeFactoryAware, A
     @Override
     public void handle(@Nonnull Request request) {
         final CompilationUnit compilationUnit = request.getCompilationUnit();
-        handle(request, compilationUnit, null, null, compilationUnit, null, null);
+        handle(request, compilationUnit, null, null, compilationUnit, null);
     }
 
-    protected void handle(@Nonnull Request request, @Nonnull Node node, @Nullable Node parent, @Nullable ParentMethod parentMethod, @Nonnull CompilationUnit compilationUnit, @Nullable ClassDeclaration topClassDeclaration, @Nullable ClassDeclaration lastClassDeclaration) {
+    protected void handle(@Nonnull Request request, @Nonnull Node node, @Nullable Node parent, @Nullable ParentMethod parentMethod, @Nonnull CompilationUnit compilationUnit, @Nullable ClassDeclaration[] classDeclarations) {
         requireNonNull("request", request);
         requireNonNull("node", node);
         requireNonNull("compilationUnit", compilationUnit);
         if (node instanceof MethodDeclaration) {
             final MethodDeclaration method = (MethodDeclaration) node;
-            final MethodStatement methodStatement = new MethodStatement(compilationUnit, topClassDeclaration, lastClassDeclaration, method);
+            final MethodStatement methodStatement = new MethodStatement(compilationUnit, method, classDeclarations);
             handleMethod(request, methodStatement, parent);
         } else {
-            handleOther(request, node, parent, parentMethod, compilationUnit, topClassDeclaration, lastClassDeclaration);
+            handleOther(request, node, parent, parentMethod, compilationUnit, classDeclarations);
             for (Node subNode : node.getAllEnclosedNodes()) {
                 if (subNode instanceof ClassDeclaration) {
-                    handle(request, subNode, node, parentMethod, compilationUnit, topClassDeclaration == null ? (ClassDeclaration) subNode : topClassDeclaration, (ClassDeclaration) subNode);
+                    final ClassDeclaration[] newDeclarations = InClassStatement.getDeclarationsWith(classDeclarations, (ClassDeclaration) subNode);
+                    handle(request, subNode, node, parentMethod, compilationUnit, newDeclarations);
                 } else {
-                    handle(request, subNode, node, parentMethod, compilationUnit, topClassDeclaration, lastClassDeclaration);
+                    handle(request, subNode, node, parentMethod, compilationUnit, classDeclarations);
                 }
             }
         }
@@ -115,7 +115,7 @@ public abstract class MethodBasedHandler implements Handler, NodeFactoryAware, A
 
     protected abstract void handleMethod(@Nonnull Request request, @Nonnull MethodStatement methodStatement, @Nonnull Node parent);
 
-    protected void handleOther(@Nonnull Request request, @Nonnull Node node, @Nonnull Node parent, @Nonnull ParentMethod parentMethod, @Nonnull CompilationUnit compilationUnit, @Nullable ClassDeclaration topClassDeclaration, @Nullable ClassDeclaration lastClassDeclaration) {}
+    protected void handleOther(@Nonnull Request request, @Nonnull Node node, @Nonnull Node parent, @Nonnull ParentMethod parentMethod, @Nonnull CompilationUnit compilationUnit, @Nullable ClassDeclaration[] classDeclarations) {}
 
     protected void prependStatementsToBody(@Nonnull MethodDeclaration method, @Nonnull Statement... toPrepend) {
         requireNonNull("method", method);
@@ -131,8 +131,42 @@ public abstract class MethodBasedHandler implements Handler, NodeFactoryAware, A
                 PositionUtils.setPositionRecursive(statement, method.getPosition());
             }
             final List<Statement> statements = new ArrayList<Statement>(method.getBody());
-            statements.addAll(0, toPrepend);
+            final MethodInvocation superCall = findSuperOrThisMethodInvocation(method);
+            statements.addAll(superCall != null ? 1 : 0, toPrepend);
             method.setBody(statements);
         }
+    }
+
+    @Nullable
+    protected MethodInvocation findSuperOrThisMethodInvocation(@Nonnull MethodDeclaration method) {
+        final MethodInvocation result;
+        if ("<init>".equals(method.getName())) {
+            final List<? extends Statement> body = method.getBody();
+            if (body != null && !body.isEmpty()) {
+                final Statement statement = body.iterator().next();
+                if (statement instanceof ExpressionStatement) {
+                    final Expression expression = ((NodeWithEnclosingExpression) statement).getExpression();
+                    if (expression instanceof MethodInvocation) {
+                        final MethodInvocation methodInvocation = (MethodInvocation) expression;
+                        final Expression methodExpression = methodInvocation.getExpression();
+                        if (methodExpression instanceof Key) {
+                            final String nameOfMethodToCall = ((NameEnabledNode) methodExpression).getName();
+                            result = "super".equals(nameOfMethodToCall) || "this".equals(nameOfMethodToCall) ? methodInvocation : null;
+                        } else {
+                            result = null;
+                        }
+                    } else {
+                        result = null;
+                    }
+                } else {
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 }

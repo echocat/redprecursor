@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -50,25 +50,26 @@ public class ParametersPassesExpressionAnnotationHandler extends MethodBasedHand
         requireNonNull("parent", parent);
         final Annotation annotation = AnnotationUtils.findAnnotationDeclarationAt(methodStatement.getMethod(), ParametersPassesExpression.class);
         if (annotation != null) {
-            final StatementProducerImpl statementProducer = new StatementProducerImpl(getNodeFactory());
+            final ExpressionProducerImpl expressionProducer = new ExpressionProducerImpl(getNodeFactory());
             final AnnotationMetaBasedStatementProducer.Request producingRequest = new AnnotationMetaBasedStatementProducer.Request() {
                 @Nonnull @Override public Annotation getAnnotation() { return annotation; }
                 @Nonnull @Override public MethodStatement getMethodStatement() { return methodStatement; }
             };
-            final Statement statement = statementProducer.produce(producingRequest);
+            final Expression expression = expressionProducer.produce(producingRequest);
+            final Statement statement = getNodeFactory().createExpressionStatement(expression);
             prependStatementsToBody(methodStatement.getMethod(), statement);
         }
     }
 
-    protected static class StatementProducerImpl extends AnnotationMetaBasedStatementProducer<AnnotationMetaBasedStatementProducer.Request> {
+    protected static class ExpressionProducerImpl extends AnnotationMetaBasedStatementProducer<AnnotationMetaBasedStatementProducer.Request> {
 
-        private StatementProducerImpl(@Nonnull NodeFactory nodeFactory) {
+        private ExpressionProducerImpl(@Nonnull NodeFactory nodeFactory) {
             super(nodeFactory);
         }
 
         @Override
         @Nonnull
-        public Statement produce(@Nonnull Request request) {
+        public Expression produce(@Nonnull Request request) {
             requireNonNull("request", request);
             final NodeFactory nodeFactory = getNodeFactory();
 
@@ -84,7 +85,7 @@ public class ParametersPassesExpressionAnnotationHandler extends MethodBasedHand
                 nodeFactory.createLiteral(request.getMethodStatement().getMethod().getName()),
                 toMethodCallInvocation
             );
-            return nodeFactory.createExpressionStatement(executeInvocation);
+            return executeInvocation;
 
         }
 

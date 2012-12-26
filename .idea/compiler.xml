@@ -5,7 +5,19 @@
     <option name="MAXIMUM_HEAP_SIZE" value="256" />
   </component>
   <component name="CompilerConfiguration">
-    <option name="DEFAULT_COMPILER" value="compAPI" />
+    <option name="DEFAULT_COMPILER" value="Javac" />
+    <excludeFromCompile>
+      <directory url="file://$PROJECT_DIR$/advancedruntime/target/generated-sources/annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/advancedruntime/target/generated-test-sources/test-annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/compilerplugin/target/generated-sources/annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/compilerplugin/target/generated-test-sources/test-annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/sun/target/generated-sources/annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/sun/target/generated-test-sources/test-annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/common/target/generated-sources/annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/common/target/generated-test-sources/test-annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/runtime/target/generated-sources/annotations" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/runtime/target/generated-test-sources/test-annotations" includeSubdirectories="true" />
+    </excludeFromCompile>
     <resourceExtensions />
     <wildcardResourcePatterns>
       <entry name="?*.properties" />
@@ -19,10 +31,32 @@
       <entry name="?*.tld" />
       <entry name="?*.ftl" />
     </wildcardResourcePatterns>
-    <annotationProcessing enabled="false" useClasspath="true" />
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="org.echocat.redprecursor.advancedruntime" />
+        <module name="org.echocat.redprecursor.common" />
+        <module name="org.echocat.redprecursor.compilerplugin" />
+        <module name="org.echocat.redprecursor.runtime" />
+        <module name="org.echocat.redprecursor.sun" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="org.echocat.redprecursor" target="1.6" />
+      <module name="org.echocat.redprecursor.advancedruntime" target="1.6" />
+      <module name="org.echocat.redprecursor.common" target="1.6" />
+      <module name="org.echocat.redprecursor.compilerplugin" target="1.6" />
+      <module name="org.echocat.redprecursor.runtime" target="1.6" />
+      <module name="org.echocat.redprecursor.sun" target="1.6" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_STRING" value="-target 1.6" />
     <option name="MAXIMUM_HEAP_SIZE" value="256" />
   </component>
 </project>

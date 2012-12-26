@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ * *** BEGIN LICENSE BLOCK *****
+ *
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is echocat redprecursor.
+ *
+ * The Initial Developer of the Original Code is Gregor Noczinski.
+ * Portions created by the Initial Developer are Copyright (C) 2012
+ * the Initial Developer. All Rights Reserved.
+ *
+ * *** END LICENSE BLOCK *****
+ ****************************************************************************************/
+
 package org.echocat.redprecursor.impl.sun.compilertree;
 
 import com.sun.source.util.TreePath;
@@ -5,6 +29,8 @@ import com.sun.tools.javac.api.JavacScope;
 import com.sun.tools.javac.api.JavacTaskImpl;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.BoundKind;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.code.Symbol.PackageSymbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTags;
 import com.sun.tools.javac.comp.Attr;
@@ -188,9 +214,22 @@ public class SunNodeFactory implements NodeFactory {
 
     @Override
     public SunClassDeclaration createClassDeclaration(String name, Modifiers modifiers) {
-        final Name jcName = _converter.stringToName(requireNonNull("name", name));
+        final String fullName = requireNonNull("name", name);
+        final Name jcFullName = _converter.stringToName(fullName);
+        final int lastDot = fullName.lastIndexOf('.');
+        final String simpleName = lastDot > 0 ? fullName.substring(lastDot + 1) : fullName;
+        final Name jcSimpleName = _converter.stringToName(simpleName);
+        final String packageName = lastDot > 0 ? fullName.substring(lastDot) : null;
+        final Name jcPackageName = packageName != null ? _converter.stringToName(packageName) : null;
+        final PackageSymbol packageSymbol = jcPackageName != null ? new PackageSymbol(jcFullName, null) : null;
+
         final SunModifiers sunModifiers = castNonNullParameterTo("modifiers", modifiers, SunModifiers.class);
-        final JCClassDecl jc = _treeMaker.ClassDef(sunModifiers.getJc(), jcName, com.sun.tools.javac.util.List.<JCTypeParameter>nil(), null, com.sun.tools.javac.util.List.<JCExpression>nil(), null);
+        final JCClassDecl jc = _treeMaker.ClassDef(sunModifiers.getJc(), jcSimpleName, com.sun.tools.javac.util.List.<JCTypeParameter>nil(), null, com.sun.tools.javac.util.List.<JCExpression>nil(), null);
+        jc.sym = new ClassSymbol(1342193665L, jcFullName, null);
+        jc.sym.name = jcSimpleName;
+        jc.sym.erasure_field = jc.sym.type;
+        jc.sym.owner = packageSymbol;
+        jc.defs = com.sun.tools.javac.util.List.nil();
         return _converter.jcToNode(jc, SunClassDeclaration.class);
     }
 

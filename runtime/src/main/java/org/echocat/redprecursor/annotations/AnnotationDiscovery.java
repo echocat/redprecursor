@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -36,9 +36,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import static java.lang.Boolean.TRUE;
+import static java.lang.System.getProperty;
+import static java.lang.reflect.Modifier.isStatic;
+import static org.echocat.redprecursor.annotations.DefaultAnnotationCreator.createFor;
 import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
 
 public class AnnotationDiscovery {
+
+    public static final String CREATE_FALLBACK_ANNOTATIONS_IF_NOT_FOUND_NAME = AnnotationDiscovery.class.getPackage().getName() + ".createFallbackAnnotationsIfNotFound";
 
     @Nonnull
     public static <T extends Annotation> T discoverMethodAnnotation(@Nonnull Class<T> annotationOfType, @Nonnull Class<?> at, @Nonnull String methodName, @Nullable Class<?>... methodParameterTypes) {
@@ -46,9 +52,9 @@ public class AnnotationDiscovery {
         requireNonNull("at", at);
         requireNonNull("methodName", methodName);
         final Method method = discoverMethod(at, methodName, methodParameterTypes);
-        final T annotation = method.getAnnotation(annotationOfType);
+        T annotation = method.getAnnotation(annotationOfType);
         if (annotation == null) {
-            throw new IllegalArgumentException("Could not find an annotation of type " + annotationOfType.getName() + " at " + at.getName() + "." + methodName + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
+            annotation = returnFallbackIfPossible(annotationOfType, "Could not find an annotation of type " + annotationOfType.getName() + " at " + at.getName() + "." + methodName + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
         }
         return annotation;
     }
@@ -58,9 +64,9 @@ public class AnnotationDiscovery {
         requireNonNull("annotationOfType", annotationOfType);
         requireNonNull("at", at);
         final Constructor<?> constructor = discoverConstructor(at, methodParameterTypes);
-        final T annotation = constructor.getAnnotation(annotationOfType);
+        T annotation = constructor.getAnnotation(annotationOfType);
         if (annotation == null) {
-            throw new IllegalArgumentException("Could not find an annotation of type " + annotationOfType.getName() + " at " + at.getName() + "." + at.getName() + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
+            annotation = returnFallbackIfPossible(annotationOfType, "Could not find an annotation of type " + annotationOfType.getName() + " at " + at.getName() + "." + at.getName() + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
         }
         return annotation;
     }
@@ -94,9 +100,9 @@ public class AnnotationDiscovery {
         if (methodParameterIndex >= allMethodParameterAnnotations.length) {
             throw new IllegalArgumentException("Could not find parameter #" + methodParameterIndex + " at " + at.getName() + "." + methodName + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
         }
-        final T annotation = findMatchingAnnotation(annotationOfType, allMethodParameterAnnotations[methodParameterIndex]);
+        T annotation = findMatchingAnnotation(annotationOfType, allMethodParameterAnnotations[methodParameterIndex]);
         if (annotation == null) {
-            throw new IllegalArgumentException("Could not find an annotation of type " + annotationOfType.getName() + " at " + at.getName() + "." + methodName + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
+            annotation = returnFallbackIfPossible(annotationOfType, "Could not find an annotation of type " + annotationOfType.getName() + " at " + at.getName() + "." + methodName + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
         }
         return annotation;
     }
@@ -110,9 +116,9 @@ public class AnnotationDiscovery {
         if (methodParameterIndex >= allMethodParameterAnnotations.length) {
             throw new IllegalArgumentException("Could not find parameter #" + methodParameterIndex + " at " + at.getName() + "." + at.getName() + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
         }
-        final T annotation = findMatchingAnnotation(annotationOfType, allMethodParameterAnnotations[methodParameterIndex]);
+        T annotation = findMatchingAnnotation(annotationOfType, allMethodParameterAnnotations[methodParameterIndex]);
         if (annotation == null) {
-            throw new IllegalArgumentException("Could not find an annotation of type " + annotationOfType.getName() + " at " + at.getName() + "." + at.getName() + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
+            annotation = returnFallbackIfPossible(annotationOfType, "Could not find an annotation of type " + annotationOfType.getName() + " at " + at.getName() + "." + at.getName() + "(" + (methodParameterTypes != null ? Arrays.toString(methodParameterTypes) : "[]") + ").");
         }
         return annotation;
     }
@@ -170,8 +176,26 @@ public class AnnotationDiscovery {
     private static Constructor<?> discoverConstructor(@Nonnull Class<?> at, @Nullable Class<?>[] parameterTypes) {
         requireNonNull("at", at);
         final Constructor<?> constructor;
+        final Class<?> enclosingClass = at.getEnclosingClass();
+        Class<?>[] targetParameterTypes = parameterTypes != null ? parameterTypes : new Class[0];
+        if (enclosingClass != null) {
+            final int modifiers = at.getModifiers();
+            if (!isStatic(modifiers)) {
+                final Class<?>[] oldParametersTypes = targetParameterTypes;
+                targetParameterTypes = new Class[oldParametersTypes.length + 1];
+                targetParameterTypes[0] = enclosingClass;
+                System.arraycopy(oldParametersTypes, 0, targetParameterTypes, 1, oldParametersTypes.length);
+            }
+        }
+        if (at.isEnum()) {
+            final Class<?>[] oldParametersTypes = targetParameterTypes;
+            targetParameterTypes = new Class[oldParametersTypes.length + 2];
+            targetParameterTypes[0] = String.class;
+            targetParameterTypes[1] = int.class;
+            System.arraycopy(oldParametersTypes, 0, targetParameterTypes, 2, oldParametersTypes.length);
+        }
         try {
-            constructor = at.getDeclaredConstructor(parameterTypes);
+            constructor = at.getDeclaredConstructor(targetParameterTypes);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Could not find " + at.getName() + "." + at.getName() + "(" + (parameterTypes != null ? Arrays.toString(parameterTypes) : "[]") + ").", e);
         }
@@ -181,6 +205,24 @@ public class AnnotationDiscovery {
         return constructor;
     }
 
-    private AnnotationDiscovery() {}
+    protected static boolean isReturnFallbackIfNotFound() {
+        return TRUE.toString().equalsIgnoreCase(getProperty(CREATE_FALLBACK_ANNOTATIONS_IF_NOT_FOUND_NAME, TRUE.toString()));
+    }
 
+    @Nonnull
+    protected static <T extends Annotation> T returnFallbackIfPossible(@Nonnull Class<T> annotationType, @Nonnull String errorMessage) throws IllegalArgumentException {
+        if (isReturnFallbackIfNotFound()) {
+            //noinspection UseOfSystemOutOrSystemErr
+            System.err.println(
+                "**********************************\n"
+                + errorMessage
+                + " - Try create dummy annotation instance."
+                + "\n**********************************");
+            return createFor(annotationType);
+        } else {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    private AnnotationDiscovery() {}
 }

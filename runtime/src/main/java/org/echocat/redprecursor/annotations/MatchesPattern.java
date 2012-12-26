@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -34,14 +34,16 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.text.MessageFormat;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.Collections.synchronizedMap;
 import static org.echocat.redprecursor.utils.ReportingUtils.throwMessageFor;
 
 @Target({ FIELD, METHOD, PARAMETER })
@@ -78,7 +80,8 @@ public @interface MatchesPattern {
     @VisibleInStackTraces(false)
     public static class Evaluator implements AnnotationEvaluator<MatchesPattern, CharSequence> {
 
-        private static final Map<MatchesPattern, Pattern> PATTERN_CACHE = synchronizedMap(new WeakHashMap<MatchesPattern, Pattern>());
+        private static final ReferenceQueue<MatchesPattern> PATTERN_REFERENCE_QUEUE = new ReferenceQueue<MatchesPattern>();
+        private static final Map<Reference<? extends MatchesPattern>, Pattern> PATTERN_CACHE = new ConcurrentHashMap<Reference<? extends MatchesPattern>, Pattern>();
 
         @Override
         public void evaluate(@Nonnull MatchesPattern annotation, @Nonnull ElementType elementType, @Nonnull String elementName, @Nullable CharSequence value) {
@@ -90,12 +93,27 @@ public @interface MatchesPattern {
 
         @Nonnull
         private static Pattern getPatternFor(MatchesPattern annotation) {
-            Pattern pattern = PATTERN_CACHE.get(annotation);
+            final Reference<MatchesPattern> reference = getReferenceFor(annotation);
+            Pattern pattern = PATTERN_CACHE.get(reference);
             if (pattern == null) {
                 pattern = Pattern.compile(annotation.value());
-                PATTERN_CACHE.put(annotation, pattern);
+                PATTERN_CACHE.put(reference, pattern);
             }
             return pattern;
+        }
+
+        @Nonnull
+        private static Reference<MatchesPattern> getReferenceFor(MatchesPattern annotation) {
+            clearReferences();
+            return new WeakReference<MatchesPattern>(annotation, PATTERN_REFERENCE_QUEUE);
+        }
+
+        private static void clearReferences() {
+            Reference<? extends MatchesPattern> reference = PATTERN_REFERENCE_QUEUE.poll();
+            while (reference != null) {
+                PATTERN_CACHE.remove(reference);
+                reference = PATTERN_REFERENCE_QUEUE.poll();
+            }
         }
     }
 }

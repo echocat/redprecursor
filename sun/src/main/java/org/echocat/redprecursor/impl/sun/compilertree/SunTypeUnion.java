@@ -24,40 +24,45 @@
 
 package org.echocat.redprecursor.impl.sun.compilertree;
 
-import com.sun.tools.javac.tree.JCTree.JCBlock;
-import com.sun.tools.javac.tree.JCTree.JCStatement;
-import org.echocat.redprecursor.compilertree.Block;
+import com.sun.tools.javac.tree.JCTree.JCExpression;
+import com.sun.tools.javac.tree.JCTree.JCTypeUnion;
 import org.echocat.redprecursor.compilertree.Position;
-import org.echocat.redprecursor.compilertree.base.Statement;
+import org.echocat.redprecursor.compilertree.TypeUnion;
+import org.echocat.redprecursor.compilertree.base.Expression;
 
 import java.util.List;
 
 import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
 
-public class SunBlock implements Block, SunStatement, SunDeclaration {
+public class SunTypeUnion implements SunIdentifier, TypeUnion {
 
-    private final JCBlock _jc;
+    private final JCTypeUnion _jc;
     private final SunNodeConverter _converter;
 
-    public SunBlock(JCBlock jc, SunNodeConverter converter) {
+    public SunTypeUnion(JCTypeUnion jc, SunNodeConverter converter) {
         _jc = requireNonNull("jc", jc);
         _converter = requireNonNull("converter", converter);
     }
 
     @Override
-    public List<? extends SunStatement> getBody() {
-        return _converter.jcsToNodes(_jc.stats, SunStatement.class);
+    public String getStringRepresentation() {
+        return _jc.toString();
     }
 
     @Override
-    public void setBody(List<Statement> body) {
-        _jc.stats = _converter.nodesToJcs(body, SunStatement.class, JCStatement.class);
+    public List<? extends SunExpression> getValues() {
+        return _jc.alternatives != null ? _converter.jcsToNodes(_jc.alternatives, SunExpression.class) : null;
     }
 
     @Override
-    public Iterable<? extends SunNode> getAllEnclosedNodes() {
-        //noinspection unchecked
-        return IterableBuilder.<SunNode>toIterable(getBody());
+    public void setValues(List<Expression> values) {
+        _jc.alternatives = values != null ? _converter.nodesToJcs(values, SunExpression.class, JCExpression.class) : null;
+    }
+
+    @Override
+    public Iterable<? extends SunExpression> getAllEnclosedNodes() {
+        // noinspection unchecked
+        return IterableBuilder.toIterable(getValues());
     }
 
     @Override
@@ -71,7 +76,7 @@ public class SunBlock implements Block, SunStatement, SunDeclaration {
     }
 
     @Override
-    public JCBlock getJc() {
+    public JCTypeUnion getJc() {
         return _jc;
     }
 

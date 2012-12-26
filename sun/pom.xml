@@ -1,4 +1,4 @@
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ~ **** BEGIN LICENSE BLOCK *****
   ~
   ~ Version: MPL 1.1
@@ -16,11 +16,11 @@
   ~ The Original Code is echocat redprecursor.
   ~
   ~ The Initial Developer of the Original Code is Gregor Noczinski.
-  ~ Portions created by the Initial Developer are Copyright (C) 2011
+  ~ Portions created by the Initial Developer are Copyright (C) 2012
   ~ the Initial Developer. All Rights Reserved.
   ~
   ~ **** END LICENSE BLOCK *****
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -31,8 +31,7 @@
     <parent>
         <groupId>org.echocat</groupId>
         <artifactId>redprecursor</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>1.0.1</version>
     </parent>
 
     <name>echocat RedPrecursor Sun-Implementation</name>
@@ -70,7 +69,7 @@
         <dependency>
             <artifactId>com.sun.java.jdk</artifactId>
             <groupId>tools</groupId>
-            <version>1.6</version>
+            <version>x</version>
             <systemPath>${java.home}/../lib/tools.jar</systemPath>
             <scope>system</scope>
         </dependency>

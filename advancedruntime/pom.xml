@@ -1,4 +1,4 @@
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ~ **** BEGIN LICENSE BLOCK *****
   ~
   ~ Version: MPL 1.1
@@ -16,11 +16,11 @@
   ~ The Original Code is echocat redprecursor.
   ~
   ~ The Initial Developer of the Original Code is Gregor Noczinski.
-  ~ Portions created by the Initial Developer are Copyright (C) 2011
+  ~ Portions created by the Initial Developer are Copyright (C) 2012
   ~ the Initial Developer. All Rights Reserved.
   ~
   ~ **** END LICENSE BLOCK *****
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -31,7 +31,7 @@
     <parent>
         <groupId>org.echocat</groupId>
         <artifactId>redprecursor</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
     <name>echocat RedPrecursor Advanced-Runtime</name>
@@ -57,11 +57,15 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <version>3.1.0.RELEASE</version>
+            <version>3.2.0.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-asm</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

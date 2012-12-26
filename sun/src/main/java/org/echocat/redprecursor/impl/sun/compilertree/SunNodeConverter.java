@@ -1,3 +1,27 @@
+/*****************************************************************************************
+ * *** BEGIN LICENSE BLOCK *****
+ *
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is echocat redprecursor.
+ *
+ * The Initial Developer of the Original Code is Gregor Noczinski.
+ * Portions created by the Initial Developer are Copyright (C) 2012
+ * the Initial Developer. All Rights Reserved.
+ *
+ * *** END LICENSE BLOCK *****
+ ****************************************************************************************/
+
 package org.echocat.redprecursor.impl.sun.compilertree;
 
 import com.sun.tools.javac.code.BoundKind;
@@ -73,7 +97,7 @@ public class SunNodeConverter {
         if (node == null) {
             jc = null;
         } else {
-            final SunNode sunNode = (SunNode) castNullableParameterTo("node", (Node)node, requiredInputType);
+            final SunNode sunNode = (SunNode) castNullableParameterTo("node", node, requiredInputType);
             final JCTree plainJc = sunNode.getJc();
             jc = requiredResultType.cast(plainJc);
         }
@@ -166,10 +190,14 @@ public class SunNodeConverter {
         final Map<String, SunExpression> argumentMap = new LinkedHashMap<String, SunExpression>();
         if (jcExpressions != null) {
             for (JCExpression jcExpression : jcExpressions) {
-                final JCAssign jcAssign = (JCAssign) jcExpression;
-                final Name name =  ((JCIdent)jcAssign.lhs).name;
-                final JCExpression valueJcExpression = jcAssign.rhs;
-                argumentMap.put(name.toString(), jcToNode(valueJcExpression, SunExpression.class));
+                if (jcExpression instanceof JCAssign) {
+                    final JCAssign jcAssign = (JCAssign) jcExpression;
+                    final Name name =  ((JCIdent)jcAssign.lhs).name;
+                    final JCExpression valueJcExpression = jcAssign.rhs;
+                    argumentMap.put(name.toString(), jcToNode(valueJcExpression, SunExpression.class));
+                } else {
+                    argumentMap.put(null, jcToNode(jcExpression, SunExpression.class));
+                }
             }
         }
         return unmodifiableMap(argumentMap);
@@ -233,9 +261,18 @@ public class SunNodeConverter {
         return typeBoundKind;
     }
 
+    public BoundKind wildcardKindToBoundKind(WildcardKind wildcardKind) {
+        final TypeBoundKind typeBoundKind = wildcardKindToTypeBoundKind(wildcardKind);
+        return typeBoundKind != null ? typeBoundKind.kind : null;
+    }
+
     public WildcardKind typeBoundKindToWildcardKind(TypeBoundKind typeBoundKind) {
         final BoundKind boundKind = requireNonNull("typeBoundKind", typeBoundKind).kind;
-        final WildcardKind wildcardKind = SunWildcardKindUtil.sunToOur(boundKind);
+        return boundKindToWildcardKind(boundKind);
+    }
+
+    public WildcardKind boundKindToWildcardKind(BoundKind boundKind) {
+        final WildcardKind wildcardKind = SunWildcardKindUtil.sunToOur(requireNonNull("boundKind", boundKind));
         return wildcardKind;
     }
 

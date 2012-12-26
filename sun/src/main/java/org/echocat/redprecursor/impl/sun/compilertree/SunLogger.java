@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -122,7 +122,6 @@ public class SunLogger implements Logger {
             throw new NullPointerException("Neither message nor t was provided.");
         }
         if (t != null) {
-            targetMessage.append("\n--------------------------------------\n");
             final StringWriter out = new StringWriter();
             t.printStackTrace(new PrintWriter(out));
             targetMessage.append(out);

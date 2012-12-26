@@ -24,8 +24,14 @@
 
 package org.echocat.redprecursor.compilertree;
 
-import org.echocat.redprecursor.compilertree.base.BodyStatement;
-import org.echocat.redprecursor.compilertree.base.Declaration;
-import org.echocat.redprecursor.compilertree.base.Statement;
+import org.echocat.redprecursor.compilertree.base.Expression;
 
-public interface Block extends BodyStatement<Statement>, Declaration {}
+import java.util.List;
+
+public interface TypeUnion extends Identifier {
+
+    public List<? extends Expression> getValues();
+
+    public void setValues(List<Expression> values);
+
+}

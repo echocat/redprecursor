@@ -16,7 +16,7 @@
  * The Original Code is echocat redprecursor.
  *
  * The Initial Developer of the Original Code is Gregor Noczinski.
- * Portions created by the Initial Developer are Copyright (C) 2011
+ * Portions created by the Initial Developer are Copyright (C) 2012
  * the Initial Developer. All Rights Reserved.
  *
  * *** END LICENSE BLOCK *****
@@ -27,7 +27,7 @@ package org.echocat.redprecursor.handler;
 import org.echocat.redprecursor.compilertree.Identifier;
 import org.echocat.redprecursor.compilertree.MethodInvocation;
 import org.echocat.redprecursor.compilertree.NodeFactory;
-import org.echocat.redprecursor.compilertree.base.Statement;
+import org.echocat.redprecursor.compilertree.base.Expression;
 import org.echocat.redprecursor.evaluation.AnnotationEvaluationExecuter;
 import org.echocat.redprecursor.handler.AnnotationBasedEvaluationExecuterStatementProducer.Request;
 import org.echocat.redprecursor.meta.AnnotationAndMeta;
@@ -35,7 +35,8 @@ import org.echocat.redprecursor.meta.AnnotationAndMeta;
 import javax.annotation.Nonnull;
 import java.lang.annotation.ElementType;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static org.echocat.redprecursor.handler.Principal.RETURN;
 import static org.echocat.redprecursor.utils.ContractUtil.requireNonNull;
 
@@ -56,7 +57,7 @@ public class AnnotationBasedEvaluationExecuterStatementProducer extends Annotati
 
     @Override
     @Nonnull
-    public Statement produce(@Nonnull Request request) {
+    public Expression produce(@Nonnull Request request) {
         requireNonNull("request", request);
         final NodeFactory nodeFactory = getNodeFactory();
         final Identifier identifierOfAnnotationInstance = getIdentifierOfAnnotationAndMetaInstance(request);
@@ -68,6 +69,6 @@ public class AnnotationBasedEvaluationExecuterStatementProducer extends Annotati
             nodeFactory.createLiteral(request.getPrincipal() == RETURN ? request.getMethodStatement().getMethod().getName() : identifierToCheck.getStringRepresentation()),
             identifierToCheck
         );
-        return nodeFactory.createExpressionStatement(executeInvocation);
+        return executeInvocation;
     }
 }
