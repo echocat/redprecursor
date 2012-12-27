@@ -5,3 +5,8 @@ The initial focus was to create a "DBC-framework":http://en.wikipedia.org/wiki/D
 h2. Status
 
 Currently the development status is *ALPHA*. You are welcome to help! :-)
+
+h2. Useful links
+
+| Maven Repository | http://repo.echocat.org/echocat |
+| Issues | https://github.com/echocat/redprecursor/issues |

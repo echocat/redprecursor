@@ -33,7 +33,7 @@
     <artifactId>redprecursor</artifactId>
     <packaging>pom</packaging>
     <version>0.1.0-SNAPSHOT</version>
-    <url>http://redprecursor.echocat.org/</url>
+    <url>https://github.com/echocat/redprecursor</url>
 
     <licenses>
         <license>
@@ -151,6 +151,18 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.7</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.wagon</groupId>
+                            <artifactId>wagon-webdav-jackrabbit</artifactId>
+                            <version>2.3</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>1.4</version>
                     <executions>
@@ -199,9 +211,51 @@
         </plugins>
     </build>
 
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/echocat/redprecursor/issues</url>
+    </issueManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>echocat-redprecursor-releases</id>
+            <url>dav:https://repo.echocat.org/redprecursor-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>echocat-redprecursor-snapshots</id>
+            <url>dav:https://repo.echocat.org/redprecursor-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>echocat</id>
+            <url>http://repo.echocat.org/echocat</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>echocat</id>
+            <url>http://repo.echocat.org/echocat</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <scm>
-        <connection>scm:svn:https://source.echocat.org/git/redprecursor.git</connection>
-        <developerConnection>scm:svn:https://source.echocat.org/git/redprecursor.git</developerConnection>
-        <url>https://source.echocat.org/browse/redprecursor</url>
+        <connection>scm:git:git@github.com:echocat/redprecursor.git</connection>
+        <developerConnection>scm:svn:git@github.com:echocat/redprecursor.git</developerConnection>
+        <url>https://github.com/echocat/redprecursor</url>
     </scm>
 </project>
