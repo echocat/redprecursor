@@ -33,7 +33,7 @@
     <artifactId>redprecursor</artifactId>
     <packaging>pom</packaging>
     <version>0.1.0-SNAPSHOT</version>
-    <url>https://github.com/echocat/redprecursor</url>
+    <url>https://redprecursor.echocat.org</url>
 
     <licenses>
         <license>
