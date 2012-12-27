@@ -1,0 +1,7 @@
+h1. redprecursor
+
+The initial focus was to create a "DBC-framework"http://en.wikipedia.org/wiki/Design_by_contract without the requirement of an Java-Agent or "AspectJ":http://en.wikipedia.org/wiki/AspectJ. The result is a "Annoation Processor":http://docs.oracle.com/javase/1.5.0/docs/guide/apt/GettingStarted.html for "@javac@":http://en.wikipedia.org/wiki/Javac which get the parsed node tree after the evaluation of the compiler, could parse and modify it befor it will be transformed to the class bytecode.
+
+h2. Status
+
+Currently the development status is *ALPHA*. You are welcome to help! :-)
