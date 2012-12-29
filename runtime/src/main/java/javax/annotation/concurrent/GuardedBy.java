@@ -1,16 +1,23 @@
+/*****************************************************************************************
+ * *** BEGIN LICENSE BLOCK *****
+ *
+ * Version: MPL 2.0
+ *
+ * echocat RedPrecursor, Copyright (c) 2011-2012 echocat
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * *** END LICENSE BLOCK *****
+ ****************************************************************************************/
+
 package javax.annotation.concurrent;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-/*
- * Copyright (c) 2005 Brian Goetz
- * Released under the Creative Commons Attribution License
- *   (http://creativecommons.org/licenses/by/2.5)
- * Official home: http://www.jcip.net
- */
 
 /**
  * GuardedBy

@@ -1,6 +1,8 @@
 <component name="CopyrightManager">
-  <settings default="redprecursor">
-    <module2copyright />
+  <settings default="">
+    <module2copyright>
+      <element module="All" copyright="echocat" />
+    </module2copyright>
     <LanguageOptions name="__TEMPLATE__">
       <option name="separateBefore" value="true" />
       <option name="separateAfter" value="true" />
