@@ -93,7 +93,7 @@ h2. Standalone
 
 * "runtime.jar":https://repo.echocat.org/redprecursor-snapshots/org/echocat/redprecursor/runtime/0.1.0-SNAPSHOT/runtime-0.1.0-SNAPSHOT.jar - Bundle it with your application to make @javax.annotation@ and @org.echocat.redprecursor.annotations@ available.
 * "advancedruntime-bundled.jar":https://repo.echocat.org/redprecursor-snapshots/org/echocat/redprecursor/advancedruntime/0.1.0-SNAPSHOT/advancedruntime-0.1.0-SNAPSHOT-bundled.jar - Bundle it with your application to make @javax.annotation@ and @org.echocat.redprecursor.annotations@ (including the advanced annoations) available.
-* "compilerplugin.jar-bundled.jar":https://repo.echocat.org/redprecursor-snapshots/org/echocat/redprecursor/compilerplugin/0.1.0-SNAPSHOT/compilerplugin-0.1.0-SNAPSHOT-bundled.jar - Include this jar in the classpath while compile of your application. _IMPORTANT: Do not bunlde it with your application._
+* "compilerplugin-bundled.jar":https://repo.echocat.org/redprecursor-snapshots/org/echocat/redprecursor/compilerplugin/0.1.0-SNAPSHOT/compilerplugin-0.1.0-SNAPSHOT-bundled.jar - Include this jar in the classpath while compile of your application. _IMPORTANT: Do not bunlde it with your application._
 
 h2. Status
 
