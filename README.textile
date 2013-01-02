@@ -1,12 +1,108 @@
-h1. redprecursor
+h1. echocat RedPrecursor
 
 The initial focus was to create a "DBC-framework":http://en.wikipedia.org/wiki/Design_by_contract without the requirement of an Java-Agent or "AspectJ":http://en.wikipedia.org/wiki/AspectJ. The result is a "Annoation Processor":http://docs.oracle.com/javase/1.5.0/docs/guide/apt/GettingStarted.html for "@javac@":http://en.wikipedia.org/wiki/Javac which get the parsed node tree after the evaluation of the compiler, could parse and modify it befor it will be transformed to the class bytecode.
 
+h1. Usage
+
+You can use all normal annotations of "JSR-305":http://jcp.org/en/jsr/detail?id=305 and more anntations in @org.echocat.redprecursor.annotations@ like @GreaterThan@, @GreaterThanOrEqualTo@, @MatchesPattern@, ...
+
+h2. Examples
+
+bc. public void takeString(@Nonnull String toPrint) {
+    System.out.println(toPrint);
+}
+...
+takeString("Hello world!"); // Will print on the console Hello world!
+takeString(null); // Will throw "NullPointerException: toPrint is null" 
+
+bc. @Nonnull public String integerToString(@Nonnegative int numberForString) {
+    return Integer.toString(numberForString);
+}
+...
+integerToString(666); // Will return "666"
+integerToString(-666); // Will throw "IllegalArgumentException: numberForString is not greater than or equal to zero." 
+
+bc. @Nonnull public String getSomeString(boolean allowedToReturnSomeString) {
+    return allowedToReturnSomeString ? "Hello world!" : null;
+}
+...
+getSomeString(true); // Will return "Hello world!"
+getSomeString(false); // Will throw "NullPointerException: The return value of getSomeString(..) is null" 
+
+h2. More?
+
+Try the power out! ;-)
+
+If you have more ideas open an issue or write us: "contact@echocat.org":mailto:contact@echocat.org
+
+h1. Links
+
+* "Maven Repository":http://repo.echocat.org/echocat
+* "Issues":https://github.com/echocat/redprecursor/issues
+
+h1. Integrate
+
+Generally you does not need a separate compiler, another tool, do not have to include a complex build mechanism or something else. You just have to add the _compilerplugin_ to your classpath while compile of your application and bundle one of the _runtimes_ with your application to make this library work. - *Not more - Really!*
+
+h2. with Maven
+
+bc.. <repositories>
+    <repository>
+        <id>echocat</id>
+        <url>http://repo.echocat.org/echocat</url>
+        <!-- We need currently this settings because we
+             only have a snapshot release currently packed. -->
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+           <enabled>true</enabled>
+           <updatePolicy>always</updatePolicy>
+        </snapshots>
+    </repository>
+</repositories>
+
+<dependencies>
+    <!-- Choose this artifact if you just use the basic annotations. -->
+    <dependency>
+        <groupId>org.echocat.reprecursor</groupId>
+        <artifactId>runtime</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <!-- This is already included by the compilerplugin. -->
+        <scope>runtime</scope>
+    </dependency>
+    <!-- Choose this artifact if you use the basic and advanced annotations. -->
+    <dependency>
+        <groupId>org.echocat.reprecursor</groupId>
+        <artifactId>advancedruntime</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <!-- This is already included by the compilerplugin. -->
+        <scope>runtime</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.echocat.reprecursor</groupId>
+        <artifactId>compilerplugin</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <!-- We only want this jar to be available untile the compilation.
+             Because this artifact contains the plugin for the javac. -->
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+
+h2. Standalone
+
+* "runtime.jar":https://repo.echocat.org/redprecursor-snapshots/org/echocat/redprecursor/runtime/0.1.0-SNAPSHOT/runtime-0.1.0-SNAPSHOT.jar - Bundle it with your application to make @javax.annotation@ and @org.echocat.redprecursor.annotations@ available.
+* "advancedruntime-bundled.jar":https://repo.echocat.org/redprecursor-snapshots/org/echocat/redprecursor/advancedruntime/0.1.0-SNAPSHOT/advancedruntime-0.1.0-SNAPSHOT-bundled.jar - Bundle it with your application to make @javax.annotation@ and @org.echocat.redprecursor.annotations@ (including the advanced annoations) available.
+* "compilerplugin.jar-bundled.jar":https://repo.echocat.org/redprecursor-snapshots/org/echocat/redprecursor/compilerplugin/0.1.0-SNAPSHOT/compilerplugin-0.1.0-SNAPSHOT-bundled.jar - Include this jar in the classpath while compile of your application. _IMPORTANT: Do not bunlde it with your application._
+
 h2. Status
 
-Currently the development status is *ALPHA*. You are welcome to help! :-)
+Currently the development status is *ALPHA*.
 
-h2. Useful links
+We currently test this code already with big production code of another closed source application but we develop this project with clearly defined coding conventions that make it be that your compiler plugin does not work with really all java code. Help us - test it with your code!
 
-| Maven Repository | http://repo.echocat.org/echocat |
-| Issues | https://github.com/echocat/redprecursor/issues |
+The danger does not belong to the compiled classes it primary belongs to the compilation process.
+
+h1. License
+
+echocat RedPrecursor is licensed under "MPL 2.0":http://mozilla.org/MPL/2.0/.
